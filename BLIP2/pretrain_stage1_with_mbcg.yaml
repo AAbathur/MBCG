@@ -1,0 +1,58 @@
+ # Copyright (c) 2022, salesforce.com, inc.
+ # All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause
+ # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+
+
+model:
+  arch: blip2
+  model_type: pretrain
+  load_pretrained: True
+  freeze_vit: True
+
+datasets:
+  cmtgen_mix_caption:
+    vis_processor:
+        train:
+          name: "blip2_image_train" ## 注册过的processor的名字
+          image_size: 224 ## 对应的一些参数
+    text_processor:
+        train:
+          name: "blip_caption"
+
+run:
+  task: image_text_pretrain
+  # optimizer
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-4 
+  min_lr: 1e-5
+  warmup_lr: 1e-6
+  weight_decay: 0.05
+  max_epoch: 10
+
+  
+  batch_size_train: 72 
+  batch_size_eval: 64
+  num_workers: 4
+  warmup_steps: 1000
+  num_beams: 5
+  max_txt_len: 50
+  max_cmt_len: 60
+  min_cmt_len: 30
+  accum_grad_iters: 3
+  find_unused_parameters: True
+
+  seed: 42
+
+  output_dir: "output/BLIP2/Pretrain_stage1_with_mbcg"
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: False 
+  train_splits: ["train"]
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: True
